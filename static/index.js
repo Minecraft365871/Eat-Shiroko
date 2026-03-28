@@ -1,53 +1,84 @@
+/**
+ * 节奏点击游戏 - 主逻辑文件
+ * 支持桌面和移动端，玩家需要在正确的时间点击对应的方块
+ */
+
+// 检测设备类型：如果是 iPad、iPhone、iPod、Android 或 Windows Phone 则视为移动设备
 let isDesktop = navigator['userAgent'].match(/(ipad|iphone|ipod|android|windows phone)/i) ? false : true;
+// 根据设备类型和设备宽度计算字体单位
 let fontunit = isDesktop ? 20 : ((window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth) / 320) * 10;
+// 动态注入 CSS 样式，根据设备类型设置元素定位方式
 document.write('<style type="text/css">' +
     'html,body {font-size:' + (fontunit < 30 ? fontunit : '30') + 'px;}' +
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
     '</style>');
+// 键盘映射：d,f,j,k 分别对应 1,2,3,4 号位置
 let map = { 'd': 1, 'f': 2, 'j': 3, 'k': 4 };
+// 自定义键型序列，默认包含 '!'（随机位置）
 let key = ['!'];
+// 特殊符号数组，用于定义不同的按键模式
 let chs = ['@', '!', '#', '&', '+', '-', '%', '*'];
+// 键型序列长度
 let len = key.length;
+// 是否隐藏分数显示
 let hide = false;
+// 游戏时间（秒）
 let __Time = 20;
+// 列数（默认 4 列）
 let __k = 4;
+// 是否关闭音效
 let _close = false;
+// 是否启用非精准区判定（放宽点击区域）
 let _fsj = false;
+// 方块点击图片路径
 var url = '/static/image/ClickBefore.png';
 
+/**
+ * 判断游戏是否正在进行中
+ * @returns {boolean} 游戏进行中返回 true
+ */
 function isplaying() {
     return document.getElementById('welcome').style.display == 'none' &&
         document.getElementById('GameScoreLayer').style.display == 'none' &&
         document.getElementById("setting1").style.display == 'none';
 }
 
+/**
+ * 处理键型序列，过滤有效字符并重置 key 数组
+ */
 function gl() {
     let tmp = [];
     len = key.length;
     var i = 0;
     for (let i = 0; i < len; ++i) {
+        // 保留特殊符号或数字范围内的字符
         if (chs.includes(key[i]) || (key[i] >= '1' && key[i] <= __k.toString())) {
             tmp.push(key[i]);
         }
+        // 将中文感叹号转换为英文
         else if (key[i] == '！') {
             tmp.push('!');
         }
     }
     key = tmp;
+    // 如果键型为空，则使用默认值
     if (key.length == 0) {
         key = ['!'];
     }
     len = key.length;
 }
 
+// 桌面设备键盘事件监听
 if (isDesktop) {
     document.write('<div id="gameBody">');
     document.onkeydown = function (e) {
         let key = e.key.toLowerCase();
+        // 如果按下的是映射键且游戏进行中，触发点击
         if (Object.keys(map).indexOf(key) !== -1 && isplaying()) {
             click(map[key]);
         }
+        // 如果按下 R 键且游戏结束界面显示中，重新开始游戏
         else if (key == 'r' && document.getElementById('GameScoreLayer').style.display != 'none') {
             gameRestart();
             document.getElementById('GameScoreLayer').style.display = 'none'
@@ -55,24 +86,31 @@ if (isDesktop) {
     }
 }
 
+// 游戏相关 DOM 元素和变量声明
 let body, blockSize, GameLayer = [],
     GameLayerBG, touchArea = [],
     GameTimeLayer;
 let transform, transitionDuration;
 
+/**
+ * 初始化游戏，设置事件监听和 UI 状态
+ */
 function init() {
     showWelcomeLayer();
     body = document.getElementById('gameBody') || document.body;
     body.style.height = window.innerHeight + 'px';
+    // 检测浏览器支持的变换属性
     transform = typeof (body.style.webkitTransform) != 'undefined' ? 'webkitTransform' : (typeof (body.style.msTransform) !=
         'undefined' ? 'msTransform' : 'transform');
     transitionDuration = transform.replace(/ransform/g, 'ransitionDuration');
     GameTimeLayer = document.getElementById('GameTimeLayer');
+    // 获取两个游戏层及其子元素
     GameLayer.push(document.getElementById('GameLayer1'));
     GameLayer[0].children = GameLayer[0].querySelectorAll('div');
     GameLayer.push(document.getElementById('GameLayer2'));
     GameLayer[1].children = GameLayer[1].querySelectorAll('div');
     GameLayerBG = document.getElementById('GameLayerBG');
+    // 根据设备类型绑定触摸或鼠标事件
     if (GameLayerBG.ontouchstart === null) {
         GameLayerBG.ontouchstart = gameTapEvent;
     } else {
@@ -80,6 +118,7 @@ function init() {
     }
     gameInit();
     initSetting();
+    // 监听窗口大小变化
     window.addEventListener('resize', refreshSize, false);
     let btn = document.getElementById('ready-btn');
     btn.className = 'btn btn-primary btn-lg';
@@ -88,6 +127,9 @@ function init() {
     }
 }
 
+/**
+ * 打开新窗口（用于分享或重新开始）
+ */
 function winOpen() {
     window.open(location.href + '?r=' + Math.random(), 'nWin', 'height=500,width=320,toolbar=no,menubar=no,scrollbars=no');
     let opened = window.open('about:blank', '_self');
@@ -96,11 +138,17 @@ function winOpen() {
 }
 let refreshSizeTime;
 
+/**
+ * 刷新游戏尺寸（防抖处理）
+ */
 function refreshSize() {
     clearTimeout(refreshSizeTime);
     refreshSizeTime = setTimeout(_refreshSize, 200);
 }
 
+/**
+ * 实际执行尺寸刷新，重新计算方块位置和大小
+ */
 function _refreshSize() {
     countBlockSize();
     for (let i = 0; i < GameLayer.length; i++) {
@@ -115,6 +163,7 @@ function _refreshSize() {
         }
     }
     let f, a;
+    // 确定上下层
     if (GameLayer[0].y > GameLayer[1].y) {
         f = GameLayer[0];
         a = GameLayer[1];
@@ -129,6 +178,9 @@ function _refreshSize() {
     a.style[transform] = 'translate3D(0,' + a.y + 'px,0)';
 }
 
+/**
+ * 计算方块尺寸和触摸区域
+ */
 function countBlockSize() {
     blockSize = body.offsetWidth / __k;
     body.style.height = window.innerHeight + 'px';
@@ -136,12 +188,16 @@ function countBlockSize() {
     touchArea[0] = window.innerHeight - blockSize * 0;
     touchArea[1] = window.innerHeight - blockSize * 3;
 }
-let _gameBBList = [],
-    _gameBBListIndex = 0,
-    _gameOver = false,
-    _gameStart = false,
-    _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
+// 游戏状态变量
+let _gameBBList = [],        // 待点击的方块列表
+    _gameBBListIndex = 0,    // 当前需要点击的方块索引
+    _gameOver = false,       // 游戏是否结束
+    _gameStart = false,      // 游戏是否开始
+    _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;  // 时间、分数相关变量
 
+/**
+ * 游戏初始化，注册音效
+ */
 function gameInit() {
     createjs.Sound.registerSound({
         src: "./static/music/err.mp3",
@@ -158,8 +214,11 @@ function gameInit() {
     gameRestart();
 }
 
-let last = 0, lkey = 0;
+let last = 0, lkey = 0;  // 键型序列当前位置和上一个位置
 
+/**
+ * 重新开始游戏，重置所有状态
+ */
 function gameRestart() {
     last = 0;
     lkey = 0;
@@ -175,6 +234,9 @@ function gameRestart() {
     refreshGameLayer(GameLayer[1], 1);
 }
 
+/**
+ * 开始游戏，启动计时器
+ */
 function gameStart() {
     _date1 = new Date();
     _gameStart = true;
@@ -184,6 +246,9 @@ function gameStart() {
 
 let date2 = new Date();
 
+/**
+ * 游戏结束处理
+ */
 function gameOver() {
     date2 = new Date();
     _gameOver = true;
@@ -194,6 +259,9 @@ function gameOver() {
     }, 1500);
 }
 
+/**
+ * 游戏计时器，每秒更新剩余时间
+ */
 function gameTime() {
     _gameTimeNum--;
     if (_gameTimeNum <= 0) {
@@ -208,13 +276,25 @@ function gameTime() {
     }
 }
 
+/**
+ * 创建时间显示文本
+ * @param {number} n - 剩余秒数
+ * @returns {string} 格式化后的时间文本
+ */
 function creatTimeText(n) {
     return '&nbsp;剩余时间:' + n;
 }
 
+// 正则表达式：匹配时间类型和清除时间类名
 let _ttreg = / t{1,2}(\d+)/,
     _clearttClsReg = / t{1,2}\d+| bad/;
 
+/**
+ * 生成指定范围内的随机整数
+ * @param {number} Min - 最小值
+ * @param {number} Max - 最大值
+ * @returns {number} 随机整数
+ */
 function Randomfrom(Min, Max) {
     let Range = Max - Min;
     let Rand = Math.random();
@@ -222,9 +302,14 @@ function Randomfrom(Min, Max) {
     return num;
 }
 
-function randomPos() { //生成按键产生的随机位置
+/**
+ * 根据键型序列生成下一个按键的位置
+ * @returns {number} 方块列索引 (0 到 __k-1)
+ */
+function randomPos() {
     let x = 0;
     if (key[last] == '!') {
+        // 完全随机位置
         x = Math.floor(Math.random() * 1000) % __k;
         let pos = last - 1;
         if (pos == -1) {
@@ -232,6 +317,7 @@ function randomPos() { //生成按键产生的随机位置
         }
     }
     else if (key[last] == '@') {
+        // 随机但不同于上一个位置
         x = Math.floor(Math.random() * 1000) % __k;
         if (x == lkey) {
             x++;
@@ -241,22 +327,27 @@ function randomPos() { //生成按键产生的随机位置
         }
     }
     else if (key[last] == '#') {
+        // 与上一个位置相同
         x = lkey;
     }
     else if (key[last] == '&') {
+        // 对称位置
         x = __k - 1 - lkey;
     }
     else if (key[last] == '+') {
+        // 向右偏移指定格数
         let num = parseInt(key[last + 1]);
         last++;
         x = (lkey + num) % __k;
     }
     else if (key[last] == '-') {
+        // 向左偏移指定格数
         let num = parseInt(key[last + 1]);
         last++;
         x = (lkey - num + __k) % __k;
     }
     else if (key[last] == '%') {
+        // 在指定范围内随机
         let num1 = parseInt(key[last + 1]) - 1;
         let num2 = parseInt(key[last + 2]) - 1;
         if (num2 < num1) {
@@ -266,6 +357,7 @@ function randomPos() { //生成按键产生的随机位置
         last += 2;
     }
     else if (key[last] == '*') {
+        // 从指定列表中随机选择一个
         let l = parseInt(key[last + 1]);
         let nums = [];
         for (let i = 1; i <= l; ++i) {
@@ -275,6 +367,7 @@ function randomPos() { //生成按键产生的随机位置
         x = nums[Randomfrom(0, l - 1)];
     }
     else {
+        // 直接指定位置（数字 1-__k）
         x = parseInt(key[last]) - 1;
     }
     lkey = x;
@@ -405,6 +498,9 @@ function showWelcomeLayer() {
     l.style.display = 'block';
 }
 
+/**
+ * 显示游戏得分界面
+ */
 function showGameScoreLayer() {
     let l = document.getElementById('GameScoreLayer');
     let c = document.getElementById(_gameBBList[_gameBBListIndex - 1].id).className.match(_ttreg)[1];
@@ -418,6 +514,7 @@ function showGameScoreLayer() {
     score_text += "</span>" + ' 次哦！';
     score_text += "<br>相当于 <span style='color:red;'>" + (_gameScore * 15000 / deviation_time).toFixed(2) + "</span> BPM 下的十六分音符哦！"
     document.getElementById('GameScoreLayer-score').innerHTML = score_text;
+    // 更新历史最高分
     let bast = cookie('bast-score');
     if (!bast || _gameScore > bast) {
         bast = _gameScore;
@@ -431,24 +528,37 @@ function showGameScoreLayer() {
     l.style.display = 'block';
 }
 
+/**
+ * 隐藏游戏得分界面
+ */
 function hideGameScoreLayer() {
     let l = document.getElementById('GameScoreLayer');
     l.style.display = 'none';
 }
 
+/**
+ * 重新开始游戏按钮
+ */
 function replayBtn() {
     gameRestart();
     hideGameScoreLayer();
 }
 
+/**
+ * 返回主菜单按钮
+ */
 function backBtn() {
     gameRestart();
     hideGameScoreLayer();
     showWelcomeLayer();
 }
 
+/**
+ * 根据分数生成评价文本
+ * @param {number} score - 游戏得分
+ * @returns {string} 评价文本
+ */
 function shareText(score) {
-
     deviation_time = (date2.getTime() - _date1.getTime())
     if (score <= 2.5 * __Time) return '加油！我相信您可以的！';
     if (score <= 5 * __Time) return '^_^ 加把劲，底力大王就是您！';
@@ -457,6 +567,11 @@ function shareText(score) {
     return '您是外星人嘛？';
 }
 
+/**
+ * 将对象转换为字符串
+ * @param {any} obj - 输入对象
+ * @returns {string} 字符串表示
+ */
 function toStr(obj) {
     if (typeof obj == 'object') {
         return JSON.stringify(obj);
@@ -465,6 +580,13 @@ function toStr(obj) {
     }
 }
 
+/**
+ * Cookie 操作函数：设置或获取 cookie
+ * @param {string} name - cookie 名称（可选，不提供则返回所有 cookie）
+ * @param {any} value - cookie 值（可选，提供则设置 cookie）
+ * @param {number} time - 过期时间（天）
+ * @returns {any} 设置时返回 true，获取时返回 cookie 值
+ */
 function cookie(name, value, time) {
     if (name) {
         if (value) {
@@ -486,8 +608,12 @@ function cookie(name, value, time) {
     return data;
 }
 
+// 动态生成游戏层 HTML
 document.write(createGameLayer());
 
+/**
+ * 初始化设置，从 cookie 加载用户配置
+ */
 function initSetting() {
     if (cookie('k')) {
         let tsmp = parseInt(cookie('k'));
