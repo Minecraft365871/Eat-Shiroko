@@ -26,18 +26,14 @@
             <div id="GameScoreLayer-score" style="font-size:0.6em; margin:10px 0;">得分</div>
             <div id="GameScoreLayer-bast" style="font-size:0.6em;">最佳</div>
             <div id="now" style="font-size:0.6em;">键型</div>
-            <div id="nosw" style="font-size:0.6em;">电脑端玩家按下R键可一键重开哦~</div>
+            <div id="nosw" style="font-size:0.6em;">电脑端玩家可按下R键一键重开喵~</div>
             <button type="button" class="btn btn-secondary btn-lg" onclick="replayBtn()">重来</button>
             <button type="button" class="btn btn-secondary btn-lg"
                 onclick="hideGameScoreLayer();showWelcomeLayer();gameRestart()">返回主页</button>
             <button type="button" class="btn btn-secondary btn-lg"
-                onclick="window.location.href='https://github.com/Atopos1331/eatcat'">源代码(改版后)</button>
+                onclick="window.location.href='https://github.com/Minecraft365871/Eat-Shiroko'">源代码</button>
             <button type="button" class="btn btn-secondary btn-lg"
-                onclick="window.location.href='https://github.com/arcxingye/EatKano'">源代码(原版)</button>
-            <button type="button" class="btn btn-secondary btn-lg"
-                onclick="window.location.href='https://space.bilibili.com/470549205'">作者的B站主页</button>
-            <button type="button" class="btn btn-secondary btn-lg"
-                onclick="window.location.href='https://space.bilibili.com/3494374381979891'">网站拥有者的B站主页</button>
+                onclick="window.location.href='https://space.bilibili.com/3494374381979891'">我的B站主页</button>
         </div>
     </div>
     </div>
@@ -46,16 +42,13 @@
         <div class="FILL BOX-M" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;">
             <div style="margin:0 8% 0 9%;">
                 <div style="font-size:1.2em; color:#FEF002;" id="tt">吃掉小白子（支持高度自定义~）</div><br />
-                <div style="font-size: 1.0em; color:rgb(45, 255, 4); line-height:1.5em;" id="tttt">
-                    更新公告：现在可以设置垂直判定啦！<br />
-                </div>
                 <div style="font-size: 1.0em; color:#fff; line-height:1.5em;" id="ttt">
                     从最底下开始<br />
-                    看看您能吃多少白子~<br />
-                    注：设置里有很多好东西哟！<br />
+                    看看您能吃掉多少白子~<br />
+                    注：设置里有很多好东西喵！<br />
                     电脑玩家在默认设置下 <br />
                     键盘上的DFJK键<br />
-                    可分别控制四个轨道哦！<br />
+                    可分别控制四个轨道喵！<br />
                 </div>
                 <br />
                 <div id="btn_group" style="display: block;">
@@ -63,12 +56,12 @@
                     <button type="button" class="btn btn-secondary btn-lg" onclick="show_setting()">游戏设置</button>
                     <br /><br />
                     <button type="button" class="btn btn-secondary btn-lg"
-                        onclick="foreach()">若出现了Bug点击此按钮后刷新界面</button>
+                        onclick="foreach()">若出现了Bug点击此按钮后刷新界面喵</button>
                     <br /><br />
                 </div>
 
                 <div id="btn_group2" style="display: block;">
-                    <h2 style="font-size:1.0em; color:#fff; line-height:1.5em;">一键设置特殊键型（若按键全部消失请刷新界面）</h2>
+                    <h2 style="font-size:1.0em; color:#fff; line-height:1.5em;">一键设置特殊键型（若按键全部消失请刷新界面喵）</h2>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="autoset('!')">纯随机</button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="autoset('@')">无纵连的随机</button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="autoset('@#')">短纵</button>
@@ -80,34 +73,34 @@
                 </div>
                 <div id="setting1" style="display: none;">
                     <h3 style="font-size:1.0em; color:#fff; line-height:1.3em;">
-                        请在此处输入您需要的键数（这边建议是2~8哦）
+                        在此处输入您需要的键数（这边建议是2~8喵）
                     </h3>
                     <div class="input-group mb-3">
                         <input align="center" type="text" id="k" class="inputtxt" maxlength=10>
                     </div>
                     <h3 style="font-size:1.0em; color:#fff; line-height:1.3em;">
-                        请在此处输入与您需要的键数数量相等的英文字母 <br />
-                        以绑定键盘上对应的按键哦（不区分大小写,手机端玩家请忽略按键设置）！<br />
-                        4K下电脑默认为DFJK哦！其他键数请自行设置！<br />
+                        在此处输入与您需要的键数数量相等的英文字母 <br />
+                        以绑定键盘上对应的按键喵（不区分大小写,手机端玩家请忽略按键设置喵）！<br />
+                        4K下电脑默认为DFJK喵！其他键数请自行设置！<br />
                     </h3>
                     <div class="input-group mb-3">
                         <input type="text" id="keyboard" class="inputtxt" maxlength=99999>
                     </div>
                     <h3 style="font-size:1.0em; color:#fff; line-height:1.3em;">
-                        请在此处输入您想要设置的时间限制哦~ （单位：秒） <br />
+                        在此处输入您想要设置的时间限制喵~ （单位：秒） <br />
                     </h3>
                     <div class="input-group mb-3">
                         <input type="text" id="timeinput" class="inputtxt" maxlength=4>
                     </div>
                     <h3 style="font-size:1.0em; color:#fff; line-height:1.3em;">
-                        请在此处输入您想要设置的键型哦~ <a href="https://docs.qq.com/doc/DYVNMQ0pEWm12VGpv/" target="_blank">
+                        在此处输入您想要设置的键型喵~ <a href="https://docs.qq.com/doc/DYVNMQ0pEWm12VGpv/" target="_blank">
                             <br>（注意：键型设置有改动，详细说明请点击这里）</a> <br />
                     </h3>
                     <div class="input-group mb-3">
                         <input type="text" id="note" class="inputtxt" maxlength=99999>
                     </div>
                     <button type="button" class="btn btn-secondary btn-lg"
-                        onclick="show_btn(1);save_cookie();">完成</button>
+                        onclick="show_btn(1);save_cookie();">完成ヾ(≧▽≦*)o</button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="nxtpage(1);">下一页</button>
                 </div>
                 <div id="setting2" style="display: none;">
@@ -127,7 +120,7 @@
                     <input type="checkbox" id="fsj" class="rradio">
                     <br>
                     <h3 style="font-size:1.0em; color:#fff; line-height:1.3em;">
-                        自定义按键显示的图片（可以是动图哦~）
+                        自定义按键显示的图片（可以是动图喵~）
                     </h3>
                     <div class="u-file-c u-file-btn">
                         <input id="upload-input" type="file" accept="image/gif, image/jpg, image/png, image/webp"
@@ -137,7 +130,7 @@
                     <br>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="lstpage(2);">上一页</button>
                     <button type="button" class="btn btn-secondary btn-lg"
-                        onclick="show_btn(2);save_cookie();">完成</button>
+                        onclick="show_btn(2);save_cookie();">完成ヾ(≧▽≦*)o</button>
                 </div>
             </div>
         </div>
