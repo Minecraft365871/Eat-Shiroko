@@ -45,18 +45,18 @@ python -m http.server 8000
 ## 📁 项目结构
 
 ```
-├── index.html          # 主页面
-├── favicon.ico         # 网站图标
-├── static/             # 静态资源目录
-│   ├── index.css       # 样式表
-│   ├── index.js        # 游戏逻辑
-│   ├── image/          # 图片资源
-│   │   ├── ClickBefore.png
-│   │   └── AfterClicking.png
-│   ├── music/          # 音效文件
-│   │   ├── tap.mp3
-│   │   ├── err.mp3
-│   │   └── end.mp3
+├── index.html                # 主页面
+├── favicon.ico               # 网站图标
+├── static/                   # 静态资源目录
+│   ├── index.css             # 样式表
+│   ├── index.js              # 游戏逻辑
+│   ├── image/                # 图片资源
+│   │   ├── ClickBefore.png   # 点击前图片
+│   │   └── AfterClicking.png # 点击后图片
+│   ├── music/                # 音效文件
+│   │   ├── tap.mp3           # 点击音效
+│   │   ├── err.mp3           # 失败音效
+│   │   └── end.mp3           # 到时音效
 ```
 
 ## ⚙️ 自定义设置
