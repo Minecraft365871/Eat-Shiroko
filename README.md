@@ -72,3 +72,8 @@ python -m http.server 8000
 
 - [改版源代码](https://github.com/Atopos1331/eatcat)
 - [原版源代码](https://github.com/arcxingye/EatKano)
+
+## 🥵电子宠物
+
+![Stone Badge](https://stone.professorlee.work/api/stone/Minecraft365871/Eat-Shiroko)
+
