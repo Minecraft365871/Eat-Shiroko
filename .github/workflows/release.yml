@@ -1,0 +1,64 @@
+name: Build and Release                        # 工作流名称
+
+on:                                            # 触发器
+  push:
+    branches: [ main ]                         # push 到 main 时触发
+  workflow_dispatch:                           # 允许手动触发工作流
+
+jobs:                                          # 作业
+  build:                                       # build 作业
+    runs-on: ubuntu-latest                     # 工作流运行环境
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4              # 将代码仓库检出到 runner
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2            # 设置 Node.js 环境
+        with:
+          node-version: "16"
+
+      - name: Install dependencies
+        run: npm install                       # 安装项目依赖
+
+      - name: Build project
+        run: npm run build                     # 构建项目
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4       # 上传构建产物
+        with:
+          name: build-artifacts
+          path: build/
+
+  release:                                     # release 作业
+    needs: build                               # 依赖于 build 作业
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4     # 下载构建产物
+        with:
+          name: build-artifacts
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1        # 在 GitHub 上创建新 release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v1.0.0
+          release_name: Release v1.0.0
+          body: |
+            Release notes for v1.0.0
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1  # 将构建产物作为 release 资源上传
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/
+          asset_name: build-artifacts.zip
+          asset_content_type: application/zip
