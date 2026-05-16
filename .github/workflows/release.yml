@@ -40,25 +40,17 @@ jobs:                                          # 作业
         with:
           name: build-artifacts
 
+      - name: Zip build artifacts
+        run: zip -r build-artifacts.zip build/ # 将构建产物打包成 ZIP
+
       - name: Create GitHub Release
         id: create_release
-        uses: actions/create-release@v1        # 在 GitHub 上创建新 release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1   # 在 GitHub 上创建新 release
         with:
-          tag_name: v1.0.0
-          release_name: Release v1.0.0
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
           body: |
-            Release notes for v1.0.0
+            Release notes for version v${{ github.run_number }}
           draft: false
           prerelease: false
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1  # 将构建产物作为 release 资源上传
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/
-          asset_name: build-artifacts.zip
-          asset_content_type: application/zip
+          files: build-artifacts.zip
